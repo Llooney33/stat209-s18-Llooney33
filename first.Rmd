@@ -16,7 +16,7 @@ library(ggplot2)
 This data describes favorite restaurants of students in class. There are names of the students, names of restaurants, locations of restaurants, favorite dishes, cost of meals per person, yearly vists, and last time visted.
  
 ```{r}
-restaurants <- read_csv ("C:/Users/ll9de/desktop/restaurants.csv")
+class <- read_csv("https://raw.githubusercontent.com/URstats/stat209-s18-Llooney33/master/restaurants.csv")
 
 ```
  
@@ -25,12 +25,12 @@ restaurants <- read_csv ("C:/Users/ll9de/desktop/restaurants.csv")
 ## Plotting the Data
 
 ```{r}
-ggplot(restaurants, aes(cost_per_person)) +
+ggplot(class, aes(cost_per_person)) +
   geom_bar()
 
-ggplot(restaurants, aes(cost_per_person,cuisine)) +
+ggplot(class, aes(cost_per_person,cuisine)) +
   geom_line()
 
-ggplot(restaurants, aes(cost_per_person, location)) +
+ggplot(class, aes(cost_per_person, location)) +
   geom_point()
 ```
