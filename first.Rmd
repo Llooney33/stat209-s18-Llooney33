@@ -28,9 +28,9 @@ restaurants <- read_csv ("C:/Users/ll9de/desktop/restaurants.csv")
 ggplot(restaurants, aes(cost_per_person)) +
   geom_bar()
 
-ggplot(restaurants, aes(cuisine)) +
-  geom_bar()
+ggplot(restaurants, aes(cost_per_person,cuisine)) +
+  geom_line()
 
-ggplot(restaurants, aes(location)) +
-  geom_bar()
+ggplot(restaurants, aes(cost_per_person, location)) +
+  geom_point()
 ```
