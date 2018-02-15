@@ -1,0 +1,123 @@
+---
+title: "Lab 10: Filtering Data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(fig.height = 5)
+knitr::opts_chunk$set(fig.width = 8.5)
+knitr::opts_chunk$set(out.width = "100%")
+knitr::opts_chunk$set(dpi = 300)
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(viridis)
+theme_set(theme_minimal())
+```
+
+## Pick a dataset
+
+Today you will again have a choice of three datasets to work with. You can
+choose either to investigate the daily team ELO ratings in the NBA:
+
+```{r}
+nba <- read_csv("https://statsmaths.github.io/stat_data/nba_elo_daily.csv")
+```
+
+Metadata from US senator's tweets:
+
+```{r}
+tweets <- read_csv("https://statsmaths.github.io/stat_data/senator_tweets_meta.csv")
+```
+
+Or swear words given in the movies of Quentin Tarantino:
+
+```{r}
+tarantino <- read_csv("https://statsmaths.github.io/stat_data/tarantino.csv")
+```
+
+Pick a dataset (feel free to delete the others from the Rmd file if you would
+like), and work on the instructions in the next section.
+
+## Instructions
+
+This lab is similar to the last. You'll pick a dataset and then generate an
+analysis of that data using data visualizations. The difference here is that
+instead of a single plot, I would like you to construct 3-4 plots that
+together tell a linear story. Each plot should be separated by a sentence or
+two describing what the viewer should take away from the plot. Try to keep the
+plots similar in some way; perhaps each simply highlights a different subset
+of the data but has the same underlying layers.
+
+Notice that each of the datasets for today are larger than you will probably
+be able to use. You will need to filter the data to a particular team, year,
+subset of curse words. You may further filter the data to highlight an even
+smaller subset of the data within each plot.
+
+## Analysis
+```{r}
+ggplot(nba, aes(season, elo)) +
+geom_point()
+```
+
+```{r}
+gsw <- filter(nba, team == "GSW")
+```
+
+```{r}
+cle <- filter(nba, team == "CLE")
+```
+
+```{r}
+hou <- filter(nba, team == "HOU")
+```
+
+```{r}
+sas <- filter(nba, team == "SAS")
+
+```
+
+```{r}
+ggplot(gsw, aes(season, elo)) +
+  geom_line(aes(group = season),color="blue", size = 1) +
+  geom_point(aes(group = season), color="black", data = cle, size = 1) +
+annotate("text", x = 2014, y = 1950 , label = "GSW 2017 NBA Champs") +
+annotate("point", x =2017, y = 1850, color = "blue", size = 3) +
+  annotate("text", x = 2010, y = 1850 , label = "GSW 2015 NBA Champs") +
+annotate("point", x =2015, y = 1800, color = "blue", size = 3) +
+  annotate("text", x = 2014, y = 1900 , label = "CLE 2016 NBA Champs") +
+annotate("point", x =2016, y = 1825, color = "black", size = 3)
+
+```
+
+```{r}
+ggplot(hou, aes(season, elo)) +
+  geom_line(aes(group = season),color="red", size = 1) +
+  geom_point(aes(group = season), color="dark grey", data = sas, size = 1)
+```
+
+
+```{r}
+nba_high_elo <- filter(nba, elo > 1800)
+ggplot(nba_high_elo, aes(team)) +
+       geom_bar(aes(color = team))   
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
