@@ -1,0 +1,83 @@
+---
+title: 'Project A: A Study of Friends'
+author: "Layne Looney"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+```
+
+# A Study of Friends
+
+## Overview
+This study is based off what effects friendship. I pulled names from facebook and from memory. Then I added the university or college they attend. After that I remembered the last month which I had seen them, how much I saw them that month and then gave them a score on how much I like them. I'm interested in this data because I want to see if any of the variables effect how much I like someone. 
+
+## Data dictionary
+
+Here is a data dictionary for the friends dataset:
+
+- **fname**: a character variable giving each person's given or preferable first name
+- **lname**: a character variable giving each person's last name
+- **university**: a character variable giving each person's university or college they attend
+- **last_seen**: character variable describing the last time this person was seen. Format as "YYYY-MM" with the four digit year and two digit month.
+- **times_seen**: a numeric variable that is the number of times this person was seen that month
+- **score**: a numeric variable 1-10 that is how much the person is liked
+- **plays**: a categorical variable which says if the person plays any college sport. Possible options are:
+  "y"(yes they do play sports)
+  "n"(no they do not play sports)
+
+Which can be read in as follows:
+
+```{r}
+friend <- read_csv("https://raw.githubusercontent.com/urstats/stat209-s18-llooney33/master/projecta.csv")
+friend
+```
+
+
+## Exploratory Analysis
+
+  I see a couple of interesting relationships in the data. First I'd like to start with looking at scores compared to when the person was last seen. 
+
+```{r, echo=FALSE}
+ggplot(friend, aes(score, last_seen)) +
+  geom_point()
+```
+
+
+The data shows that most people that have not been seen for a year and a half or more have a score of 5 or less, execpt for one outlier with a score of 6. Above 2016-12, the scores conistently move towards higher scores. They still have the potential to be low, but trend to be a 6 or above. However the month of october in 2017 had only scores below 5, going against the trend. The only 10s given out are all within a year of the current date as well. 
+
+  Another trend that I looked at was the relationship between those who play college sports and the score I gave them as well as if times seen during that month had any effect.
+
+```{r, echo=FALSE}
+ggplot(friend, aes(times_seen, score)) +
+  geom_point(aes(color=plays))
+```
+
+From the looks of the chart, scores were given out at all ranges. There was no difference between those who play sports in college and those who do not. Times seen during the month did not present any correlation either suprisingly. There are people who have been seen less than 5 times during the month with a score of 10 and some who were seen more than 15 times with a score of 2. 
+
+  The last relationship looked at was between the university attended and score given.
+
+```{r, echo=FALSE}
+ggplot(friend, aes(score, university)) +
+  geom_point()
+```
+
+From the data, almost all the state schools have a score of 1. Ole miss and alabama are outliers, but the majority of state schools have at least 1 person with a score of 1. Otherwise, the scores are spred out, and size of the school does not seem to play a role. 
+
+
+## Conclusion
+
+From the data and analysis, the main correlation of score is from date last seen. Whether they play sports or not does not seem to have much effect on score. The number of times seen that month is a skewed variable, since the people who were seen 19 times in the past month are all on the baseball team with me. I have to see them everyday, and is not by choice. A suprising relationship was how people who went to state schools ended up having lower scores for the most part. Another variable I would like to have added was the hometown where the person was from, and the high school they attended. 
+
+
+
+
+
