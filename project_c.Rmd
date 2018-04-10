@@ -25,10 +25,10 @@ reported <- read_csv("https://raw.githubusercontent.com/urstats/stat209-s18-lloo
 ```
 
 ## Introduction
-In this report, my subject of interest is how people report their height and weight in comparison to what those numbers actually are. My first hypothesis is that weight will have a larger differnce between actual and reported than height will. My second hypothesis is that males will report a larger number for their height than what it is. My third hypothesis is that females will report a lower number for their weight than what it is.
+In this report, my subject of interest is how people report their height and weight in comparison to what those numbers actually are. My first hypothesis is that weight will have a larger difference between actual and reported than height will. My second hypothesis is that males will report a larger number for their height than what it is. My third hypothesis is that females will report a lower number for their weight than what it is.
 
 ## Methods
-To obtain this dataset, I went online and found a 200 person sample. I then checked for errors and created a CSV with the data. Height is in cm and weight is in kg. The models used here are able to create a mean and then compare it to another mean or multiple other means.Then the model describes the best fit line for the data.
+To obtain this dataset, I went online and found a 200 person sample. I then checked for errors and created a CSV with the data. Height is in cm and weight is in kg. The models used here are able to create a mean from the data and then compare it to another mean or multiple other means. Then the model describes the best fit line for the data.
 
 ## Results
 ```{r}
