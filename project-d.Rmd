@@ -1,0 +1,256 @@
+---
+title: "NFL Redzone: Pass vs Rush"
+author: "Layne Looney"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(out.width = "100%")
+knitr::opts_chunk$set(dpi = 300)
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(ggmap)
+library(viridis)
+library(forcats)
+library(smodels)
+```
+
+
+
+```{r}
+nfl <- read_csv("https://statsmaths.github.io/stat_data/nfl2015.csv")
+```
+
+
+```{r}
+red_zone <- filter(nfl, yards_to_touchdown<20)
+nfl$run <- nfl$pass == 0
+```
+
+
+
+```{r}
+run <- filter(red_zone, pass == 0)
+pass <- filter(red_zone, pass == 1)
+
+pass_touch <- filter(pass, yards_gained == yards_to_touchdown)
+run_touch <- filter(run, yards_gained == yards_to_touchdown)
+
+```
+
+```{r}
+team_o_pass <- group_summarize(pass_touch, offense_team)
+team_o_run <- group_summarize(run_touch, offense_team)
+overal_touch <- left_join(team_o_pass, team_o_run, by = "offense_team")
+```
+
+
+
+```{r}
+average_run <- group_summarize(run, offense_team)
+average_pass <- group_summarize(pass, offense_team)
+overal_yards <- left_join(average_run,average_pass, by = "offense_team")
+```
+
+When looking at nfl teams, a critical part of their game is red zone offense. The red zone is the 20 yards in front of each end zone. This is where teams really have to test their mettle, as it is easy to score on a busted play and run for a 40 yard touchdown. Here, when both sides are giving it their all to see who buckles first, coaching really makes a difference. The play calling within the red zone can determine whether a team comes out of the drive with 7 points, 3 points, or nothing at all. In the red zone, a team running a passing play will be more likely to score than a team rushing the ball. Even if the team is a pass heavy offense, the pass will still be stronger than rushing the ball. I understand this sounds like common sense but bear with me and I will explain.
+
+First, diving into a dataset of the nfl from 2015 allows us to see the general trend of teams and how they decided to run their offense. Unless the team underwent a change in the head coaching position or the offensive coordinator position, the offense stuck with a certain style.
+
+```{r}
+ggplot(overal_yards, aes(n.x,n.y)) +
+  geom_point() +
+  xlab("Total rush attempts") +
+  ylab("Total completed passes") +
+  ggtitle("Attempts: Rush vs Pass") +
+  annotate("text", x = 62, y = 79, label = "ARI") +
+  annotate("text", x = 74, y = 71, label = "ATL") +
+  annotate("text", x = 48, y =74, label = "BAL") +
+  annotate("text", x = 57, y = 40, label = "BUF") +
+  annotate("text", x = 105, y = 71, label = "CAR") +
+  annotate("text", x = 59, y = 73, label = "CHI") +
+  annotate("text", x = 80, y = 65, label = "CIN") +
+  annotate("text", x = 52, y = 87, label = "CLE") +
+  annotate("text", x = 41, y =69, label = "DAL") +
+  annotate("text", x = 50, y = 69, label = "DEN") +
+  annotate("text", x = 38, y = 73, label = "DET", color = "dodgerblue") +
+  annotate("point", x = 38, y = 71, color = "dodgerblue") +
+  annotate("text", x = 43, y = 89, label = "GB", color = "green4") +
+  annotate("point", x = 43, y = 87, color = "green4") +
+  annotate("text", x = 52, y = 72, label = "HOU") +
+  annotate("text", x = 55, y = 76, label = "IND") +
+  annotate("text", x = 50, y = 91, label = "JAC", color = "cyan3") +
+  annotate("point", x = 50, y = 89, color = "cyan3") +
+  annotate("text", x = 52, y = 60, label = "KC") +
+  annotate("text", x = 40, y = 63, label = "MIA") +
+  annotate("text", x = 71, y = 42, label = "MIN") +
+  annotate("text", x = 65, y = 82, label = "NE") +
+  annotate("text", x = 70, y =70, label = "NO") +
+annotate("text", x = 43, y = 78, label = "NYG", color = "blue3") +
+  annotate("point", x = 43, y = 76, color = "blue3") +
+  annotate("text", x = 62, y = 76, label = "NYJ") +
+  annotate("text", x = 47, y = 56, label = "OAK") +
+  annotate("text", x = 56, y = 50, label = "PHI") +
+  annotate("text", x = 67, y = 80, label = "PIT") +
+  annotate("text", x = 36, y = 70, label = "SD", color = "gold") +
+  annotate("point", x = 38, y = 69, color = "gold") +
+  annotate("text", x = 65, y = 54, label = "SEA") +
+  annotate("text", x = 44, y = 67, label = "SF") +
+  annotate("text", x = 40, y = 34, label = "STL") +
+  annotate("text", x = 64, y = 73, label = "TB") +
+  annotate("text", x = 42, y = 57, label = "TEN") +
+  annotate("text", x = 57, y = 79, label = "WAS")
+```
+
+As you can see, there are many teams who pass more than they run.  Some are by a large margin while others try to stay more balanced. I have highlighted some teams to follow through the charts. This chart does not include pass attempts that ended up incomplete, or intercepted which would have further pushed the numbers in favor of passing over rushing. When trying to make a large gain on the football field, passing is usually the choice. It is much easier for a quarterback to throw to a receiver for 10 yards rather than a running back to run for 10 yards, as the running back will likely have to contend with the defensive line and linebackers, while the receiver only has to fight the cornerback covering him.  
+
+```{r}
+ggplot(overal_yards, aes(yards_gained_mean.x,yards_gained_mean.y)) +
+  geom_point() +
+  xlab("Average yards per rush") +
+  ylab("Average yards per pass") +
+  ggtitle("Average Yards: Rush vs Pass") +
+  annotate("text", x = 2.03, y = 4.762338, label = "ARI") +
+  annotate("text", x = 2.577027, y = 4.578261, label = "ATL") +
+  annotate("text", x = 2.229167, y = 4.130556, label = "BAL") +
+  annotate("text", x = 3.491228, y = 3.410526, label = "BUF") +
+  annotate("text", x = 2.86667, y = 4.997101, label = "CAR") +
+  annotate("text", x = 2.952203, y = 3.045070, label = "CHI") +
+  annotate("text", x = 3.3125, y = 5.326984, label = "CIN") +
+  annotate("text", x = 2.634615, y = 2.694118, label = "CLE") +
+  annotate("text", x = 2.595385, y = 3.488060, label = "DAL") +
+  annotate("text", x = 2.707451, y = 3.935821, label = "DEN") +
+  annotate("text", x = 3.631579, y = 4.890141, label = "DET", color = "dodgerblue") +
+  annotate("point", x = 3.631579, y = 4.690141, color = "dodgerblue") +
+  annotate("text", x = 2.883721, y = 3.050575, label = "GB", color = "green4") +
+  annotate("point", x = 2.883721, y = 2.850575, color = "green4") +
+  annotate("text", x = 2.769231, y = 4.742857, label = "HOU") +
+  annotate("text", x = 2.107143, y = 3.997297, label = "IND") +
+  annotate("text", x = 2.58, y = 3.774157, label = "JAC", color = "cyan3") +
+  annotate("point", x = 2.6, y = 3.674157, color = "cyan3") +
+  annotate("text", x = 3.230769, y = 3.734483, label = "KC") +
+  annotate("text", x = 3.0, y = 3.630769, label = "MIA") +
+  annotate("text", x = 2.690141, y = 3.7, label = "MIN") +
+  annotate("text", x = 2.369231, y = 5.05, label = "NE") +
+  annotate("text", x = 2.914286, y = 4.391176, label = "NO") +
+annotate("text", x = 2.0, y = 4.147368, label = "NYG", color = "blue3") +
+  annotate("point", x = 2.0, y = 3.947368, color = "blue3") +
+  annotate("text", x = 2.96667, y = 4.52, label = "NYJ") +
+  annotate("text", x = 2.595745, y = 4.125926, label = "OAK") +
+  annotate("text", x = 2.65, y = 3.24167, label = "PHI") +
+  annotate("text", x = 3.029851, y = 4.097436, label = "PIT") +
+  annotate("text", x = 1.894737, y = 5.576812, label = "SD", color = "gold") +
+  annotate("point", x = 1.894737, y = 5.376812, color = "gold") +
+  annotate("text", x = 2.507692, y = 4.715385, label = "SEA") +
+  annotate("text", x = 2.488372, y = 4.0, label = "SF") +
+  annotate("text", x = 3.6, y = 3.825, label = "STL") +
+  annotate("text", x = 2.538125, y = 3.311268, label = "TB") +
+  annotate("text", x = 1.932381, y = 4.883636, label = "TEN") +
+  annotate("text", x = 1.964912, y = 4.496623, label = "WAS")
+```
+As you can see in the graph above, almost every team has a higher average yards per pass than a higher yards per rush. However, the key to a good offense is the ability to keep your opponent on their toes. People will adapt if you continue to show them the same thing over and over again. This is what causes teams not to always pass the ball. It might not have the same potential as a passing play, but a rushing play that catches a team off guard can easily go for over 10 yards or more. By mixing in rushing plays and passing plays, it keeps your opponent guessing and increases the chance for a busted play, a play that goes for many more yards than it should. 
+
+The trend of more passing yards still hold in the confined space of the red zone. 
+```{r}
+ggplot(overal_touch, aes(yards_gained_mean.x,yards_gained_mean.y)) +
+  geom_point() +
+  xlab("Average yards per pass") +
+  ylab("Average yards per rush") +
+  ggtitle("Average Yards in the Red Zone: Pass vs Rush") +
+  annotate("text", x = 9.72, y = 4.927, label = "ARI") +
+  annotate("text", x = 7.578, y = 5.6545, label = "ATL") +
+  annotate("text", x = 8.20, y = 4.825, label = "BAL") +
+  annotate("text", x = 8.375, y = 7.45, label = "BUF") +
+  annotate("text", x = 9.043, y = 5.042, label = "CAR") +
+  annotate("text", x = 5.3, y = 2.969, label = "CHI") +
+  annotate("text", x = 9.434, y = 5.84, label = "CIN") +
+  annotate("text", x = 7.769, y = 7.2, label = "CLE") +
+  annotate("text", x = 9.25, y = 3.2, label = "DAL") +
+  annotate("text", x = 8.07, y = 8.1, label = "DEN") +
+  annotate("text", x = 6.653, y = 4.2, label = "DET", color = "dodgerblue") +
+  annotate("point", x = 6.653, y = 4.0, color = "dodgerblue") +
+  annotate("text", x = 6.328, y = 4.342, label = "GB", color = "green4") +
+  annotate("point", x = 6.428, y = 4.142, color = "green4") +
+  annotate("text", x = 9.476, y = 4.7, label = "HOU") +
+  annotate("text", x = 7.952, y = 5.8, label = "IND") +
+  annotate("text", x = 6.4, y = 2, label = "JAC", color = "cyan3") +
+  annotate("point", x = 6.4, y = 1.8, color = "cyan3") +
+  annotate("text", x = 10.5, y = 5.67, label = "KC") +
+  annotate("text", x = 7.733, y = 4.95, label = "MIA") +
+  annotate("text", x = 7.555, y = 4.4857, label = "MIN") +
+  annotate("text", x = 8.444, y = 2.969, label = "NE") +
+  annotate("text", x = 8.388, y = 3.729, label = "NO") +
+  annotate("text", x = 7.285, y = 4.95, label = "NYG", color = "blue3") +
+  annotate("point", x = 7.285, y = 4.75, color = "blue3") +
+  annotate("text", x = 8.569, y = 5.9, label = "NYJ") +
+  annotate("text", x = 8.98, y = 5.8, label = "OAK") +
+  annotate("text", x = 6.181, y = 3.892, label = "PHI") +
+  annotate("text", x = 8.263, y = 3.2625, label = "PIT") +
+  annotate("text", x = 10.130, y = 3.45, label = "SD", color = "gold") +
+  annotate("point", x = 10.130435, y = 3.25, color = "gold") +
+  annotate("text", x = 9.875, y = 2.755, label = "SEA") +
+  annotate("text", x = 9.00, y = 6.771, label = "SF") +
+  annotate("text", x = 12.8, y = 5.771, label = "STL") +
+  annotate("text", x = 8.0, y = 4.45, label = "TB") +
+  annotate("text", x = 7.368, y = 2.971, label = "TEN") +
+  annotate("text", x = 7.173, y = 4.628, label = "WAS")
+
+```
+
+Red defense is different than defense in other areas of the field. The defense does not have as much room to cover so the closer you get to the goal line, the tighter the defense can get. This makes running the ball much tougher, and while it makes passing more difficult due to the lack of room, passing the ball is still easier. Teams might use a play to run the ball and set up a passing play or just go for it the first opportunity they get, but the data below shows more teams have more passing touchdowns than rushing touchdowns
+
+```{r}
+ggplot(overal_touch, aes(n.x,n.y)) +
+  geom_point() +
+  xlab("Passing Touchdowns") +
+  ylab("Rushing Touchdowns") +
+  ggtitle("Touchdowns: Rush vs Pass") +
+annotate("text", x = 25, y = 12, label = "ARI") +
+  annotate("text", x = 19, y = 12, label = "ATL") +
+  annotate("text", x = 15, y = 9, label = "BAL") +
+  annotate("text", x = 8, y = 11, label = "BUF") +
+  annotate("text", x = 23, y = 20, label = "CAR") +
+  annotate("text", x = 10, y = 14, label = "CHI") +
+  annotate("text", x = 23, y = 18, label = "CIN") +
+  annotate("text", x = 13, y = 6, label = "CLE") +
+  annotate("text", x = 12, y = 7, label = "DAL") +
+  annotate("text", x = 14, y = 11, label = "DEN") +
+  annotate("text", x = 26, y = 7, label = "DET", color = "dodgerblue") +
+  annotate("point", x = 26, y = 6, color = "dodgerblue") +
+  annotate("text", x = 21, y = 8, label = "GB", color = "green4") +
+  annotate("point", x = 21, y = 7, color = "green4") +
+  annotate("text", x = 21, y = 6.5, label = "HOU") +
+  annotate("text", x = 21, y = 5.5, label = "IND") +
+  annotate("text", x = 25, y = 6, label = "JAC", color = "cyan3") +
+  annotate("point", x = 25, y = 5, color = "cyan3") +
+  annotate("text", x = 14, y = 18, label = "KC") +
+  annotate("text", x = 15, y = 7, label = "MIA") +
+  annotate("text", x = 9, y = 15, label = "MIN") +
+  annotate("text", x = 27, y = 14, label = "NE") +
+  annotate("text", x = 18, y = 18, label = "NO") +
+annotate("text", x = 21, y = 4.5, label = "NYG", color = "blue3") +
+  annotate("point", x = 21, y = 4, color = "blue3") +
+  annotate("text", x = 26, y = 11, label = "NYJ") +
+  annotate("text", x = 19, y = 6, label = "OAK") +
+  annotate("text", x = 11, y = 14, label = "PHI") +
+  annotate("text", x = 19, y = 17, label = "PIT") +
+  annotate("text", x = 23, y = 5, label = "SD", color = "gold") +
+  annotate("point", x = 23, y = 4, color = "gold") +
+  annotate("text", x = 16, y = 10, label = "SEA") +
+  annotate("text", x = 11, y = 8, label = "SF") +
+  annotate("text", x = 5, y = 15, label = "STL") +
+  annotate("text", x = 15, y = 13, label = "TB") +
+  annotate("text", x = 19, y = 8, label = "TEN") +
+  annotate("text", x = 23, y = 8, label = "WAS") 
+```
+
+The majority of teams here have more passing touchdowns than rushing touchdowns, proving the greater opportunity to score is to pass the ball. 6 teams out of the 32 in the NFL have more rushing touchdowns than passing touchdowns, and only the Kansas City Chiefs have above 15 rushing touchdowns. Compare that to the 19 teams that have over 15 passing touchdowns. Even though their offenses aren't balanced, the pass heavy offenses still find a way to convert their opportunities in the red zone. They are just varied enough to open up passing plays or they are talented enough to run their passing plays and beat their opponents, even through they are expecting it. So to even though the run is crucial to football, the pass the better option to go to in the red zone, even if you are a pass heavy offense.
+
+
+
+
+
